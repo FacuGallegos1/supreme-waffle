@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "btree.h"
-#include "pila.h"
 
 static void imprimir_entero(int data) {
   printf("%d ", data);
@@ -32,10 +31,10 @@ int main() {
   
   printf("Función iterativa:\n");
   printf("Recorrido preorder:\n");
-  //btree_recorrer_it(A, BTREE_RECORRIDO_PRE, imprimir_entero);
+  btree_recorrer_it(A, BTREE_RECORRIDO_PRE, imprimir_entero);
   puts("");
   printf("Recorrido inorder:\n");
-  //btree_recorrer_it(A, BTREE_RECORRIDO_IN, imprimir_entero);
+  btree_recorrer_it(A, BTREE_RECORRIDO_IN, imprimir_entero);
   puts("");
   printf("Recorrido postorder:\n");
   btree_recorrer_it(A, BTREE_RECORRIDO_POST, imprimir_entero);

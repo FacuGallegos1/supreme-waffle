@@ -1,5 +1,6 @@
 #include "btree.h"
 #include "pila.h"
+#include "pilaxbtree.h"
 #include <stdlib.h>
 
 BTree btree_crear() {
@@ -47,7 +48,7 @@ BTree btree_unir(int dato, BTree left, BTree right) {
 }
 
 void btree_recorrer_rec(BTree arbol, BTreeOrdenDeRecorrido orden, 
-                    FuncionVisitante visit) {
+                        FuncionVisitante visit) {
   // Caso base
   if (btree_empty(arbol))
     return;
@@ -89,61 +90,58 @@ int btree_es_hoja(BTNodo* nodo) {
   }
 }
 
-int btree_handler_es_hoja(void* dato) {
-  return btree_es_hoja(btree_cast(dato));
-}
-
 void btree_recorrer_it(BTree arbol, BTreeOrdenDeRecorrido orden,
                        FuncionVisitante visit) {
   Pila pila = pila_crear();
-  if (!btree_empty(arbol))
-    pila = pila_push(pila, arbol);
+  if (!btree_empty(arbol)) {
+    PilaXBTree pb = pb_crear(arbol, 0);
+    if (btree_es_hoja(arbol)) {
+      pb->esDestruible = 1;
+    }
+    pila = pila_push(pila, pb);
+  }
   while (!pila_is_empty(pila)) {
-    // Si encuentro una hoja
-    if (btree_handler_es_hoja(pila->ultimo->dato)) {
-      visit(btree_get_dato(pila->ultimo->dato));
+    // Si encuentro un nodo destruible
+    if (pb_cast(pila->ultimo->dato)->esDestruible) {
+      visit(btree_get_dato(pb_cast(pila->ultimo->dato)->nodo));
+      pb_destruir(pb_cast(pila->ultimo->dato));
       pila_pop(pila);
     } else {
-      // Saco el dato de la pila sin destruir el mismo, analizo la raíz obtenida
-      BTree raiz = btree_cast(pila_top(pila));
+      // Saco el dato de la pila, analizo la raíz obtenida
+      BTree raiz = pb_cast(pila->ultimo->dato)->nodo;
+      pb_destruir(pb_cast(pila->ultimo->dato));
       pila_pop(pila);
+      // De ahora en más, la raíz va a ser destruible
+      PilaXBTree pb = pb_crear(raiz, 1);
       switch (orden) {
         // Si el recorrido es preorder
         case BTREE_RECORRIDO_PRE:
           if (!btree_empty(raiz->right))
-            pila = pila_push(pila, raiz->right); // Derecha
+            pila = pila_push(pila, pb_crear(raiz->right, 0)); // Derecha
           if (!btree_empty(raiz->left))
-            pila = pila_push(pila, raiz->left);  // Izquierda
-          pila = pila_push(pila, raiz);          // Raíz
+            pila = pila_push(pila, pb_crear(raiz->left, 0));  // Izquierda
+          pila = pila_push(pila, pb);                         // Raíz
           break;
     
         // Si el recorrido es inorder
         case BTREE_RECORRIDO_IN:
           if (!btree_empty(raiz->right))
-            pila = pila_push(pila, raiz->right); // Derecha
-          pila = pila_push(pila, raiz);          // Raíz
+            pila = pila_push(pila, pb_crear(raiz->right, 0)); // Derecha
+          pila = pila_push(pila, pb);                         // Raíz
           if (!btree_empty(raiz->left))
-            pila = pila_push(pila, raiz->left);  // Izquierda
+            pila = pila_push(pila, pb_crear(raiz->left, 0));  // Izquierda
           break;
     
         // Si el recorrido es postorder
         case BTREE_RECORRIDO_POST:
-          pila = pila_push(pila, raiz);          // Raíz
+          pila = pila_push(pila, pb);                         // Raíz
           if (!btree_empty(raiz->right))
-            pila = pila_push(pila, raiz->right); // Derecha
+            pila = pila_push(pila, pb_crear(raiz->right, 0)); // Derecha
           if (!btree_empty(raiz->left))
-            pila = pila_push(pila, raiz->left);  // Izquierda
+            pila = pila_push(pila, pb_crear(raiz->left, 0));  // Izquierda
           break;
       }
-      // Convierto la raíz en una hoja porque sólo me queda procesarla
-      raiz->left = NULL;
-      raiz->right = NULL;
-      /**
-       * De esta manera si desde la pila elimino sus subárboles izquierda o
-       * derecha, raiz->left y raiz->right no quedan dangling.
-       **/
     }
   }
   pila_destruir(pila);
 }
-
