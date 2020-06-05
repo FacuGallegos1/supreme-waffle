@@ -32,54 +32,53 @@ ITree itree_insertar(double ini, double fin, ITree tree) {
     tree->left = NULL;
     tree->right = NULL;
   }else{
-     if (ini == tree->extremo_izq ){
-	   if (fin == tree->extremo_der){
-	     printf("El intervalo [%f, %f] ya existe.\n", ini, fin);
-       }else{
-	     if (fin < tree->extremo_der){
-	     tree->left = itree_insertar(ini, fin, tree->left);
-	     }else{
-		   tree->right = itree_insertar(ini, fin, tree->right);
-		 }
-	   }
-     }else{
-	   if (ini < tree->extremo_izq ){
-	     tree->left = itree_insertar(ini, fin, tree->left);
-	   }else{
-	     tree->right = itree_insertar(ini, fin, tree->right);
-	   }
-     }
+     int comp_intervalo = intervalos_comparar(ini, fin, tree->extremo_izq, 
+                                                        tree->extremo_der);
+     if (comp_intervalo == -1)
+       tree->left = itree_insertar(ini, fin, tree->left);
+     else if (comp_intervalo == 1)
+       tree->right = itree_insertar(ini, fin, tree->right);
+     else
+       printf("El intervalo [%f, %f] ya existe.\n", ini, fin);
   }
-	    
   return tree;
 }
 
-/*
+
 ITree itree_eliminar(double ini, double fin, ITree tree) {
   if (itree_empty(tree))
-  else{
-     if (ini == tree->extremo_izq && fin == tree->extremo_der){
-	   if (!(tree->extremo_izq) && !(tree->extremo_der)){
-	     free tree;
-       }else{
-	     if (fin < tree->extremo_der){
-	     tree->left = itree_insertar(ini, fin, tree->left);
-	     }else{
-		   tree->right = itree_insertar(ini, fin, tree->right);
-		 }
-	   }
-     }else{
-	   if (ini < tree->extremo_izq ){
-	     tree->left = itree_insertar(ini, fin, tree->left);
-	   }else{
-	     tree->right = itree_insertar(ini, fin, tree->right);
-	   }
-     }
-  }
-	    
-  return tree;
+    return tree;
+  int comp_intervalo = intervalos_comparar(ini, fin, tree->extremo_izq, 
+                                                     tree->extremo_der);
+  if (comp_intervalo == 0) {
+    if (itree_empty(tree->left)	&& itree_empty(tree->right)) {
+      free(tree);
+      return NULL;
+    }
+    if (!(itree_empty(tree->left)) && itree_empty(tree->right)) {
+	  ITree temp1 = tree->left;
+	  free(tree);
+	  return temp1;
+    }
+    if (itree_empty(tree->left) && !(itree_empty(tree->right))) {
+	  ITree temp2 = tree->right;
+	  free(tree);
+	  return temp2;
+    }else{
+      ITree temp3 = minimo_nodo_a_raiz(tree->right);
+      temp3->left = tree->left;
+      free(tree);
+      return temp3;
+    }
+  }else if (comp_intervalo == -1){
+     tree->left = itree_eliminar(ini, fin, tree->left);
+     return tree;
+   }else{
+     tree->right = itree_eliminar(ini, fin,tree->right);
+     return tree;
+   }
 }
-*/
+
 
 void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden, 
                     FuncionVisitante visit) {
@@ -112,3 +111,36 @@ void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,
   }
 }
 
+int intervalos_comparar(double ini1, double fin1, double ini2,double fin2) {
+  if (ini1 < ini2)
+    return -1;
+  if (ini1 > ini2)
+    return 1;
+  if (ini1 == ini2){
+    if (fin1 < fin2)
+      return -1;
+    if (fin1 > fin2)
+      return 1;
+    else 
+      return 0;
+  }
+}
+
+ITree minimo_nodo_a_raiz(ITree tree){
+  if (itree_empty(tree))
+    return tree;
+  else{
+    ITree min = tree;	  
+    ITree rec = tree;
+    while(rec->left) {
+	  if (rec->left->left)
+	    rec = rec->left;
+	  else{
+	    min = rec->left;
+	    rec->left = min->right;
+        min->right = tree;
+      }
+    }
+    return min;    
+  }
+}

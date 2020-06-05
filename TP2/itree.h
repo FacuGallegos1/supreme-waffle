@@ -79,4 +79,19 @@ void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,
  */
 void itree_recorrer_bfs(ITree arbol, FuncionVisitante visit); 
 
+/**
+ * Dado un árbol de intervalos, arranca el nodo con el menor intervalo
+ * y lo agrega como raiz, con el árbol original como hijo su derecho
+ * y NULL su hijo izquierdo
+ */
+ITree minimo_nodo_a_raiz(ITree tree);
+
+/*
+ * Dados dos intervalos, devuelve:
+ * 0 si son iguales
+ * -1 si el primero es menor al segundo
+ * 1 si el primero es mayor al segundo
+ */
+int intervalos_comparar(double ini1, double fin1, double ini2,double fin2);
+
 #endif /* __ITREE_H__ */
