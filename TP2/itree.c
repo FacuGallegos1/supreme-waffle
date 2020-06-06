@@ -28,10 +28,11 @@ ITree itree_insertar(double ini, double fin, ITree tree) {
 	tree = malloc(sizeof(ITNodo));
     tree->extremo_izq = ini;
     tree->extremo_der = fin;
-    tree->max_der = fin;
+    tree->max = fin;
     tree->left = NULL;
     tree->right = NULL;
   }else{
+     tree->max = maximo(fin, tree->max);
      int comp_intervalo = intervalos_comparar(ini, fin, tree->extremo_izq, 
                                                         tree->extremo_der);
      if (comp_intervalo == -1)
@@ -51,32 +52,27 @@ ITree itree_eliminar(double ini, double fin, ITree tree) {
   int comp_intervalo = intervalos_comparar(ini, fin, tree->extremo_izq, 
                                                      tree->extremo_der);
   if (comp_intervalo == 0) {
-    if (itree_empty(tree->left)	&& itree_empty(tree->right)) {
-      free(tree);
-      return NULL;
-    }
-    if (!(itree_empty(tree->left)) && itree_empty(tree->right)) {
-	  ITree temp1 = tree->left;
+    ITree temp;
+    if (itree_empty(tree->left)) {
+	  temp = tree->right;
 	  free(tree);
-	  return temp1;
-    }
-    if (itree_empty(tree->left) && !(itree_empty(tree->right))) {
-	  ITree temp2 = tree->right;
+    }else if (itree_empty(tree->right)) {
+	  temp = tree->left;
 	  free(tree);
-	  return temp2;
     }else{
-      ITree temp3 = minimo_nodo_a_raiz(tree->right);
-      temp3->left = tree->left;
+      temp = minimo_nodo_a_raiz(tree->right);
+      temp->left = tree->left;
       free(tree);
-      return temp3;
+      actualizar_max(temp);
     }
-  }else if (comp_intervalo == -1){
+    return temp;
+  }
+  if (comp_intervalo == -1)
      tree->left = itree_eliminar(ini, fin, tree->left);
-     return tree;
-   }else{
+  else
      tree->right = itree_eliminar(ini, fin,tree->right);
-     return tree;
-   }
+  actualizar_max(tree);
+  return tree; 
 }
 
 
@@ -90,7 +86,7 @@ void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,
   switch (orden) {
     // Si el recorrido es preorder
     case ITREE_RECORRIDO_PRE:
-      visit(arbol->extremo_izq, arbol->extremo_der);
+      visit(arbol->extremo_izq, arbol->extremo_der, arbol->max);
       itree_recorrer_dfs(arbol->left, orden, visit);
       itree_recorrer_dfs(arbol->right, orden, visit);
       break;
@@ -98,7 +94,7 @@ void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,
     // Si el recorrido es inorder
     case ITREE_RECORRIDO_IN:
       itree_recorrer_dfs(arbol->left, orden, visit);
-      visit(arbol->extremo_izq, arbol->extremo_der);
+      visit(arbol->extremo_izq, arbol->extremo_der, arbol->max);
       itree_recorrer_dfs(arbol->right, orden, visit);
       break;
     
@@ -106,8 +102,21 @@ void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,
     case ITREE_RECORRIDO_POST:
       itree_recorrer_dfs(arbol->left, orden, visit);
       itree_recorrer_dfs(arbol->right, orden, visit);
-      visit(arbol->extremo_izq, arbol->extremo_der);
+      visit(arbol->extremo_izq, arbol->extremo_der, arbol->max);
       break;
+  }
+}
+
+int itree_altura(ITree arbol) {
+  if (itree_empty(arbol)) {
+    return -1;
+  }
+  int altura_izq = itree_altura(arbol->left);
+  int altura_der = itree_altura(arbol->right);
+  if (altura_izq > altura_der) {
+    return altura_izq + 1;
+  } else {
+    return altura_der + 1;
   }
 }
 
@@ -139,8 +148,31 @@ ITree minimo_nodo_a_raiz(ITree tree){
 	    min = rec->left;
 	    rec->left = min->right;
         min->right = tree;
+        actualizar_max(min);
       }
     }
     return min;    
   }
+}
+
+void actualizar_max(ITree nodo) {
+  if (itree_empty(nodo))
+    return;
+  if (nodo->left) {
+	if (nodo->right) { 
+      double aux_max = maximo(nodo->left->max, nodo->right->max);
+      nodo->max = maximo(nodo->max, aux_max);
+	}else
+	  nodo->max = maximo(nodo->max, nodo->left->max);
+  }else{
+	  if (nodo->right)
+	    nodo->max = maximo(nodo->max, nodo->right->max);
+	}
+}
+
+float maximo(double a, double b) {
+  if(a < b)
+    return b;
+  else
+    return a;
 }

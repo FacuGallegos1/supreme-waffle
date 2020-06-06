@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include "itree.h"
 
-void mostrar_intervalo(double ini, double fin) {
-  printf("[%f, %f]\n", ini, fin);
+void mostrar_intervalo(double ini, double fin, double max) {
+  printf("[%f, %f] max = %f\n", ini, fin, max);
 }
 
 int main() {
@@ -25,7 +25,9 @@ int main() {
   test = itree_insertar(6, 8, test);
   test = itree_insertar(1, 3, test);
   
+  //printf("hola\n");
   test = itree_eliminar(-0.3, 1, test);
+  //printf("hola2\n");
   test = itree_eliminar(3, 5, test);
   test = itree_eliminar(0, 2, test);
   test = itree_eliminar(1.5, 2.5, test);

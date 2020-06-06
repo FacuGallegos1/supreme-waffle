@@ -1,7 +1,7 @@
 #ifndef __ITREE_H__
 #define __ITREE_H__
 
-typedef void (*FuncionVisitante) (double ini, double fin);
+typedef void (*FuncionVisitante) (double ini, double fin, double max);
 
 typedef enum {
   ITREE_RECORRIDO_IN,
@@ -20,7 +20,7 @@ typedef struct _Intervalo {
 typedef struct _ITNodo {
   double extremo_izq;
   double extremo_der;
-  double max_der;
+  double max;
   struct _ITNodo *left;
   struct _ITNodo *right;
 } ITNodo;
@@ -79,6 +79,11 @@ void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,
  */
 void itree_recorrer_bfs(ITree arbol, FuncionVisitante visit); 
 
+/*
+ * Devuelve la altura de un arbol dado.
+ */
+int itree_altura(ITree arbol);
+
 /**
  * Dado un árbol de intervalos, arranca el nodo con el menor intervalo
  * y lo agrega como raiz, con el árbol original como hijo su derecho
@@ -93,5 +98,15 @@ ITree minimo_nodo_a_raiz(ITree tree);
  * 1 si el primero es mayor al segundo
  */
 int intervalos_comparar(double ini1, double fin1, double ini2,double fin2);
+
+/*
+ * Dado un itree, actualiza el campo max de su raíz.
+ */
+void actualizar_max(ITree nodo);
+
+/*
+ * Devuelve el máximo entre dos números.
+ */
+float maximo(double a, double b);
 
 #endif /* __ITREE_H__ */
