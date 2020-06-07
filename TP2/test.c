@@ -19,17 +19,23 @@ int main() {
   test = itree_insertar(-0.5, 3, test);
   test = itree_insertar(-0.3, 1, test);
   test = itree_insertar(1, 1.5, test);
-  test = itree_insertar(1.3, 2, test);
-  test = itree_insertar(2, 3, test);
+  test = itree_insertar(1.3, 3, test);
+  test = itree_insertar(2, 2.5, test);
   test = itree_insertar(4, 10, test);
   test = itree_insertar(6, 8, test);
   test = itree_insertar(1, 3, test);
+  test = itree_insertar(2, 2.6, test);
+  test = itree_insertar(2, 2.4, test);
+  test = itree_insertar(2, 2.3, test);
+  test = itree_insertar(1.6, 5, test);
+  test = itree_insertar(2, 2.35, test);
+  
   
   //printf("hola\n");
-  test = itree_eliminar(-0.3, 1, test);
+  //test = itree_eliminar(2, 4, test);
   //printf("hola2\n");
-  test = itree_eliminar(3, 5, test);
-  test = itree_eliminar(0, 2, test);
+  //test = itree_eliminar(3, 5, test);
+  //test = itree_eliminar(0, 2, test);
   test = itree_eliminar(1.5, 2.5, test);
   
   printf("TEST PREORDER\n");

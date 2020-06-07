@@ -75,6 +75,20 @@ ITree itree_eliminar(double ini, double fin, ITree tree) {
   return tree; 
 }
 
+ITree minimo_nodo_a_raiz(ITree tree){
+  //if (itree_empty(tree))
+  //  return tree;
+  if (!(tree->left))
+    return tree;
+  ITree min = tree->left;
+  if (!(min->left)) 
+    tree->left = min->right;
+  min = minimo_nodo_a_raiz(min);
+  min->right = tree;
+  actualizar_max(tree);
+  return min;
+}
+
 
 void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden, 
                     FuncionVisitante visit) {
@@ -135,25 +149,7 @@ int intervalos_comparar(double ini1, double fin1, double ini2,double fin2) {
   }
 }
 
-ITree minimo_nodo_a_raiz(ITree tree){
-  if (itree_empty(tree))
-    return tree;
-  else{
-    ITree min = tree;	  
-    ITree rec = tree;
-    while(rec->left) {
-	  if (rec->left->left)
-	    rec = rec->left;
-	  else{
-	    min = rec->left;
-	    rec->left = min->right;
-        min->right = tree;
-        actualizar_max(min);
-      }
-    }
-    return min;    
-  }
-}
+
 
 void actualizar_max(ITree nodo) {
   if (itree_empty(nodo))
@@ -161,12 +157,12 @@ void actualizar_max(ITree nodo) {
   if (nodo->left) {
 	if (nodo->right) { 
       double aux_max = maximo(nodo->left->max, nodo->right->max);
-      nodo->max = maximo(nodo->max, aux_max);
+      nodo->max = maximo(nodo->extremo_der, aux_max);
 	}else
-	  nodo->max = maximo(nodo->max, nodo->left->max);
+	  nodo->max = maximo(nodo->extremo_der, nodo->left->max);
   }else{
 	  if (nodo->right)
-	    nodo->max = maximo(nodo->max, nodo->right->max);
+	    nodo->max = maximo(nodo->extremo_der, nodo->right->max);
 	}
 }
 
