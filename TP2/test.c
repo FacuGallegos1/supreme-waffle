@@ -32,18 +32,19 @@ int main() {
   
   
   //printf("hola\n");
-  //test = itree_eliminar(2, 4, test);
+  test = itree_eliminar(2, 4, test);
   //printf("hola2\n");
-  //test = itree_eliminar(3, 5, test);
-  //test = itree_eliminar(0, 2, test);
+  test = itree_eliminar(3, 5, test);
+  test = itree_eliminar(0, 2, test);
+  test = itree_eliminar(-0.3, 1, test);
   test = itree_eliminar(1.5, 2.5, test);
   
   printf("TEST PREORDER\n");
   itree_recorrer_dfs(test, ITREE_RECORRIDO_PRE, mostrar_intervalo);
-  printf("TEST INORDER\n");
-  itree_recorrer_dfs(test, ITREE_RECORRIDO_IN, mostrar_intervalo);
-  printf("TEST POSORDER\n");
-  itree_recorrer_dfs(test, ITREE_RECORRIDO_POST, mostrar_intervalo);
+  //printf("TEST INORDER\n");
+  //itree_recorrer_dfs(test, ITREE_RECORRIDO_IN, mostrar_intervalo);
+  //printf("TEST POSORDER\n");
+  //itree_recorrer_dfs(test, ITREE_RECORRIDO_POST, mostrar_intervalo);
   
   itree_destruir(test);
   return 0;
