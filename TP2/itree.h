@@ -1,7 +1,7 @@
 #ifndef __ITREE_H__
 #define __ITREE_H__
 
-typedef void (*FuncionVisitante) (double ini, double fin, double max);
+typedef void (*FuncionVisitante) (double ini, double fin, double max, int h);
 
 typedef enum {
   ITREE_RECORRIDO_IN,
@@ -21,6 +21,7 @@ typedef struct _ITNodo {
   double extremo_izq;
   double extremo_der;
   double max;
+  int altura;
   struct _ITNodo *left;
   struct _ITNodo *right;
 } ITNodo;
@@ -31,6 +32,11 @@ typedef ITNodo *ITree;
  * Crea un árbol de intervalos vacío.
  */
 ITree itree_crear();
+
+/*
+ * Devuelve un nuevo nodo hoja
+ */
+ITree nodo_nuevo(double ini, double fin);
 
 /**
  * Destruye el árbol de intervalos.
@@ -84,6 +90,25 @@ void itree_recorrer_bfs(ITree arbol, FuncionVisitante visit);
  */
 int itree_altura(ITree arbol);
 
+/*
+ * Actualiza altura de un nodo
+ */
+void actualizar_altura(ITree nodo);
+
+/*
+ * Si el argumento corresponde a un nodo en un Árbol AVL el valor de
+ * retorno va a estar en el conjunto {-1, 0, 1} .
+*/
+int itree_balance_factor(ITree nodo);
+
+
+/*
+ * Funciones que producen las rotaciones simples para árboles de intervalos AVL.
+ */
+ITree rotar_a_izquierda(ITree tree);
+ITree rotar_a_derecha(ITree tree);
+
+
 /**
  * Dado un árbol de intervalos, arranca el nodo con el menor intervalo
  * y lo agrega como raiz, con el árbol original como hijo su derecho
@@ -108,5 +133,7 @@ void actualizar_max(ITree nodo);
  * Devuelve el máximo entre dos números.
  */
 float maximo(double a, double b);
+
+int maximo2(int a, int b);
 
 #endif /* __ITREE_H__ */
