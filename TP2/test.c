@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include "itree.h"
 
-void mostrar_intervalo(double ini, double fin, double max, int h) {
-  printf("[%f, %f], max = %f, altura =%d\n", ini, fin, max, h);
+void mostrar_intervalo(ITNodo* nodo) {
+  printf("[%f, %f], max = %f, altura =%d\n", nodo->extremo_izq, 
+                                             nodo->extremo_der, nodo->max, 
+                                             nodo->altura);
 }
 
 int main() {
@@ -40,6 +42,8 @@ int main() {
   */
   printf("TEST PREORDER\n");
   itree_recorrer_dfs(test, ITREE_RECORRIDO_PRE, mostrar_intervalo);
+  printf("TEST bfs\n");
+  itree_recorrer_bfs(test, mostrar_intervalo);
   //printf("TEST INORDER\n");
   //itree_recorrer_dfs(test, ITREE_RECORRIDO_IN, mostrar_intervalo);
   //printf("TEST POSORDER\n");

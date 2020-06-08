@@ -1,8 +1,6 @@
 #ifndef __ITREE_H__
 #define __ITREE_H__
 
-typedef void (*FuncionVisitante) (double ini, double fin, double max, int h);
-
 typedef enum {
   ITREE_RECORRIDO_IN,
   ITREE_RECORRIDO_PRE,
@@ -27,6 +25,8 @@ typedef struct _ITNodo {
 } ITNodo;
 
 typedef ITNodo *ITree;
+
+typedef void (*FuncionVisitante) (ITNodo* nodo);
 
 /**
  * Crea un árbol de intervalos vacío.
@@ -66,7 +66,7 @@ ITree itree_eliminar(double ini, double fin, ITree root);
  * apuntador al nodo correspondiente. 
 ITree itree_intersectar(double ini, double fin, ITree root);
 
-/**
+ *
  * Recorrido del arbol, utilizando la funcion pasada.
  */
 void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,

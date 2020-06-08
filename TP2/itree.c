@@ -1,4 +1,5 @@
 #include "itree.h"
+#include "cola.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -187,7 +188,7 @@ ITree rotar_a_derecha(ITree tree) {
 
 
 void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden, 
-                    FuncionVisitante visit) {
+                        FuncionVisitante visit) {
   // Caso base
   if (itree_empty(arbol))
     return;
@@ -196,7 +197,7 @@ void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,
   switch (orden) {
     // Si el recorrido es preorder
     case ITREE_RECORRIDO_PRE:
-      visit(arbol->extremo_izq, arbol->extremo_der, arbol->max, arbol->altura);
+      visit(arbol);
       itree_recorrer_dfs(arbol->left, orden, visit);
       itree_recorrer_dfs(arbol->right, orden, visit);
       break;
@@ -204,7 +205,7 @@ void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,
     // Si el recorrido es inorder
     case ITREE_RECORRIDO_IN:
       itree_recorrer_dfs(arbol->left, orden, visit);
-      visit(arbol->extremo_izq, arbol->extremo_der, arbol->max, arbol->altura);
+      visit(arbol);
       itree_recorrer_dfs(arbol->right, orden, visit);
       break;
     
@@ -212,9 +213,28 @@ void itree_recorrer_dfs(ITree arbol, ITreeOrdenDeRecorrido orden,
     case ITREE_RECORRIDO_POST:
       itree_recorrer_dfs(arbol->left, orden, visit);
       itree_recorrer_dfs(arbol->right, orden, visit);
-      visit(arbol->extremo_izq, arbol->extremo_der, arbol->max, arbol->altura);
+      visit(arbol);
       break;
   }
+}
+
+void itree_recorrer_bfs(ITree arbol, FuncionVisitante visit) {
+  if (itree_empty(arbol)) {
+    printf("El árbol está vacío\n");
+    return;
+  }
+  Cola cola = cola_crear();
+  cola_encolar(cola, arbol); // Encolo la raíz
+  while(!cola_es_vacia(cola)) {
+    ITree primero = (ITree)cola_primero(cola);
+    if (!itree_empty(primero->left))
+      cola_encolar(cola, primero->left);
+    if (!itree_empty(primero->right))
+    cola_encolar(cola, primero->right);
+    visit(primero);
+    cola_desencolar(cola);
+  }
+  cola_destruir(cola);
 }
 
 int intervalos_comparar(double ini1, double fin1, double ini2,double fin2) {
@@ -230,6 +250,8 @@ int intervalos_comparar(double ini1, double fin1, double ini2,double fin2) {
     else 
       return 0;
   }
+  return 0; // Facu: lo puse yo para que no me diera error el -Werror
+            // error: control reaches end of a non-void function
 }
 
 void actualizar_max(ITree nodo) {
