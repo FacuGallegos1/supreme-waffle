@@ -39,7 +39,6 @@ ITree itree_insertar(double ini, double fin, ITree tree) {
 	tree = nodo_nuevo(ini, fin);
     return tree;                                                                
   }else{
-     tree->max = maximo(fin, tree->max);                                        // Actualizo max (específico de esta esta estructura)
      int comp_intervalo = intervalos_comparar(ini, fin, tree->extremo_izq,      // Insercion normal
                                                         tree->extremo_der);     //  . 
      if (comp_intervalo == -1)                                                  // .
@@ -48,16 +47,13 @@ ITree itree_insertar(double ini, double fin, ITree tree) {
        tree->right = itree_insertar(ini, fin, tree->right);                     // .
      else{                                                                      // .
        printf("El intervalo [%f, %f] ya existe.\n", ini, fin);                  // .
-       return tree;                                                             // . (creo que)No es necesario este return, pero evito lo que sigue en caso que ya exista el intervalo
+       return tree;                                                             // . 
      }                                                             
   }                                                                             
-  
-  tree->altura = 1 + maximo2(itree_altura(tree->left),                          // Actualizo altura
-                             itree_altura(tree->right));
-  
- /*                                                                             
-  * Seguramente en esta parte me falte arreglar lo de la inserción
-  int bf = itree_balance_factor(tree);                                          // Guardo los nuevos factores balances
+  actualizar_max(tree); 
+  actualizar_altura(tree);
+                                                                              
+  int bf = itree_balance_factor(tree);                                          // Guardo el factores balances
   
   if (bf < -1 && intervalos_comparar(ini, fin, tree->left->extremo_izq,         // caso izq izq
                                               tree->left->extremo_der) == -1)    
@@ -71,14 +67,14 @@ ITree itree_insertar(double ini, double fin, ITree tree) {
   
   if (bf > 1 && intervalos_comparar(ini, fin, tree->right->extremo_izq,         // caso der der
                                               tree->right->extremo_der) == 1) 
-    return rotar_a_izquierda(tree->right);
+    return rotar_a_izquierda(tree);
   
   if (bf > 1 && intervalos_comparar(ini, fin, tree->right->extremo_izq,         // caso der izq
                                               tree->right->extremo_der) == -1) {
     tree->right = rotar_a_derecha(tree->right);
     return rotar_a_izquierda(tree);
   }
-  */
+  
   return tree;
 }
 
@@ -241,10 +237,9 @@ void actualizar_max(ITree nodo) {
       nodo->max = maximo(nodo->extremo_der, aux_max);
 	}else
 	  nodo->max = maximo(nodo->extremo_der, nodo->left->max);
-  }else{
-	  if (nodo->right)
-	    nodo->max = maximo(nodo->extremo_der, nodo->right->max);
-	}
+  }else if (nodo->right)
+	      nodo->max = maximo(nodo->extremo_der, nodo->right->max);
+	    else nodo->max = nodo->extremo_der;
 }
 
 float maximo(double a, double b) {
