@@ -32,17 +32,15 @@ int main() {
   test = itree_insertar(1.6, 5, test);
   test = itree_insertar(2, 2.35, test);
   
-  
-  //printf("hola\n");
- /* test = itree_eliminar(2, 4, test);
+  test = itree_eliminar(2, 4, test);
   test = itree_eliminar(3, 5, test);
   test = itree_eliminar(0, 2, test);
   test = itree_eliminar(-0.3, 1, test);
   test = itree_eliminar(1.5, 2.5, test);
-  */
-  /*
+  
   printf("TEST PREORDER\n");
   itree_recorrer_dfs(test, ITREE_RECORRIDO_PRE, mostrar_intervalo);
+  /*
   printf("TEST bfs\n");
   itree_recorrer_bfs(test, mostrar_intervalo);
   */

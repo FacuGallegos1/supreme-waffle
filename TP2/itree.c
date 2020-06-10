@@ -39,22 +39,22 @@ ITree itree_insertar(double ini, double fin, ITree tree) {
   if (itree_empty(tree)) {                                                      // si es vacio, creo el nodo,
     tree = nodo_nuevo(ini, fin);                                                // caso base
     return tree;                                                                
-  } else {
-    int comp_intervalo = intervalos_comparar(ini, fin, tree->extremo_izq,       // Insercion normal,
-                                                       tree->extremo_der);      // caso recursivo
-    if (comp_intervalo == -1)                                                   // .
-      tree->left = itree_insertar(ini, fin, tree->left);                        // .
-    else if (comp_intervalo == 1)                                               // .
-      tree->right = itree_insertar(ini, fin, tree->right);                      // .
-    else {                                                                      // .
-      printf("El intervalo [%lf, %lf] ya existe.\n", ini, fin);                 // .
-      return tree;                                                              // .
-    }                                                             
-  }                                                                             
+  }
+  int comp_intervalo = intervalos_comparar(ini, fin, tree->extremo_izq,         // Insercion normal,
+                                                     tree->extremo_der);        // caso recursivo
+  if (comp_intervalo == -1)                                                     // .
+    tree->left = itree_insertar(ini, fin, tree->left);                          // .
+  else if (comp_intervalo == 1)                                                 // .
+    tree->right = itree_insertar(ini, fin, tree->right);                        // .
+  else {                                                                        // .
+    printf("El intervalo [%lf, %lf] ya existe.\n", ini, fin);                   // .
+    return tree;                                                                // .
+  }                                                             
+                                                                             
   actualizar_max(tree);
   actualizar_altura(tree);
   
-  int bf = itree_balance_factor(tree);                                          // Guardo el factores balances
+  int bf = itree_balance_factor(tree);                                          // Guardo el factor balance
   
   // acá se podría poner bf perteneciente a {-1; 1}
   
@@ -92,27 +92,43 @@ ITree itree_eliminar(double ini, double fin, ITree tree) {
     ITree temp;
     if (itree_empty(tree->left)) {
 	  temp = tree->right;
-	  free(tree);
     }else if (itree_empty(tree->right)) {
 	  temp = tree->left;
-	  free(tree);
     }else{
       temp = minimo_nodo_a_raiz(tree->right);
       temp->left = tree->left;
-      free(tree);
-      actualizar_max(temp);                                                       // actualizo max una vez enganchado
-      temp->altura = 1 + maximo_i(itree_altura(temp->left),                        //  Actualizo altura
-                                  itree_altura(temp->right));
+      actualizar_max(temp);                                                     // Actualizo max una vez enganchado
+      actualizar_altura(temp);                                                  // Actualizo altura
     }
+    free(tree);
     return temp;
   }
   if (comp_intervalo == -1)
      tree->left = itree_eliminar(ini, fin, tree->left);
   else
      tree->right = itree_eliminar(ini, fin,tree->right);
-  actualizar_max(tree);                                                         //  Actualizo max
-  tree->altura = 1 + maximo_i(itree_altura(tree->left),                         //  Actualizo altura
-                              itree_altura(tree->right));
+  
+  actualizar_max(tree);                                                         // Actualizo max
+  actualizar_altura(tree);                                                      // Actualizo altura
+  
+  int bf = itree_balance_factor(tree);                                          // Guardo el factor balance
+  
+  if (bf < -1 && itree_balance_factor(tree->left) <= 0)                         // caso izq izq
+    return rotar_a_derecha(tree);
+  
+  if (bf < -1 && itree_balance_factor(tree->left) > 0) {                        // caso izq der
+    tree->left = rotar_a_izquierda(tree->left);
+    return rotar_a_derecha(tree);
+  }
+  
+  if (bf > 1 && itree_balance_factor(tree->right) >= 0)                         // caso der der
+    return rotar_a_izquierda(tree);
+  
+  if (bf > 1 && itree_balance_factor(tree->right) < 0) {                        // caso der izq
+    tree->right = rotar_a_derecha(tree->right);
+    return rotar_a_izquierda(tree);
+  }
+  
   return tree; 
 }
 
@@ -132,19 +148,32 @@ ITree itree_intersectar(double ini, double fin, ITree tree) {
 }
 
 ITree minimo_nodo_a_raiz(ITree tree){
-  //if (itree_empty(tree))
-  //  return tree;
-  if (!(tree->left))
+  if (itree_empty(tree->left))
     return tree;
   ITree min = tree->left;
-  if (!(min->left)) 
-    tree->left = min->right;
   min = minimo_nodo_a_raiz(min);
+  
+  tree->left = min->right;
   min->right = tree;
   actualizar_max(tree);
-  tree->altura = 1 + maximo_i(itree_altura(tree->left),                         //  Actualizo altura
-                              itree_altura(tree->right));
-  return min;
+  actualizar_altura(tree);
+  
+  int bf = itree_balance_factor(tree);
+  
+  if (bf < -1 && itree_balance_factor(tree->left) <= 0)                        // caso izq izq
+    min->right = rotar_a_derecha(tree);
+  else if (bf < -1 && itree_balance_factor(tree->left) > 0) {                  // caso izq der
+    tree->left = rotar_a_izquierda(tree->left);
+    min->right = rotar_a_derecha(tree);
+  }
+  else if (bf > 1 && itree_balance_factor(tree->right) >= 0)                   // caso der der
+    min->right = rotar_a_izquierda(tree);
+  else if (bf > 1 && itree_balance_factor(tree->right) < 0) {                  // caso der izq
+    tree->right = rotar_a_derecha(tree->right);
+    min->right = rotar_a_izquierda(tree);
+  }
+  else 
+   return min;
 }
 
 int itree_altura(ITree arbol) {
