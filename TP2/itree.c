@@ -7,15 +7,15 @@ ITree itree_crear() {
   return NULL;
 }
 
-ITree nodo_nuevo(double ini, double fin) {
-  ITree nuevo = malloc(sizeof(ITNodo));
+ITNodo* nodo_nuevo(double ini, double fin) {
+  ITNodo* nuevo = malloc(sizeof(ITNodo));
   nuevo->extremo_izq = ini;
   nuevo->extremo_der = fin;
   nuevo->max = fin;
   nuevo->altura = 0;
   nuevo->left = NULL;
   nuevo->right = NULL;
-  return nuevo;        
+  return nuevo;
 }
 
 void itree_destruir(ITree nodo) {
@@ -36,28 +36,30 @@ ITree itree_insertar(double ini, double fin, ITree tree) {
 	printf("El intervalo [%f, %f] no es válido.\n", ini, fin);
 	return tree;
   }*/
-  if (itree_empty(tree)){                                                       // si es vacio, creo el nodo
-	tree = nodo_nuevo(ini, fin);
+  if (itree_empty(tree)) {                                                      // si es vacio, creo el nodo,
+    tree = nodo_nuevo(ini, fin);                                                // caso base
     return tree;                                                                
-  }else{
-     int comp_intervalo = intervalos_comparar(ini, fin, tree->extremo_izq,      // Insercion normal
-                                                        tree->extremo_der);     //  . 
-     if (comp_intervalo == -1)                                                  // .
-       tree->left = itree_insertar(ini, fin, tree->left);                       // .
-     else if (comp_intervalo == 1)                                              // .
-       tree->right = itree_insertar(ini, fin, tree->right);                     // .
-     else{                                                                      // .
-       printf("El intervalo [%f, %f] ya existe.\n", ini, fin);                  // .
-       return tree;                                                             // . 
-     }                                                             
+  } else {
+    int comp_intervalo = intervalos_comparar(ini, fin, tree->extremo_izq,       // Insercion normal,
+                                                       tree->extremo_der);      // caso recursivo
+    if (comp_intervalo == -1)                                                   // .
+      tree->left = itree_insertar(ini, fin, tree->left);                        // .
+    else if (comp_intervalo == 1)                                               // .
+      tree->right = itree_insertar(ini, fin, tree->right);                      // .
+    else {                                                                      // .
+      printf("El intervalo [%lf, %lf] ya existe.\n", ini, fin);                 // .
+      return tree;                                                              // .
+    }                                                             
   }                                                                             
-  actualizar_max(tree); 
+  actualizar_max(tree);
   actualizar_altura(tree);
-                                                                              
+  
   int bf = itree_balance_factor(tree);                                          // Guardo el factores balances
   
+  // acá se podría poner bf perteneciente a {-1; 1}
+  
   if (bf < -1 && intervalos_comparar(ini, fin, tree->left->extremo_izq,         // caso izq izq
-                                              tree->left->extremo_der) == -1)    
+                                              tree->left->extremo_der) == -1)   
     return rotar_a_derecha(tree);
   
   if (bf < -1 && intervalos_comparar(ini, fin, tree->left->extremo_izq,         // caso izq der
@@ -99,8 +101,8 @@ ITree itree_eliminar(double ini, double fin, ITree tree) {
       temp->left = tree->left;
       free(tree);
       actualizar_max(temp);                                                       // actualizo max una vez enganchado
-      temp->altura = 1 + maximo2(itree_altura(temp->left),                        //  Actualizo altura
-                             itree_altura(temp->right));
+      temp->altura = 1 + maximo_i(itree_altura(temp->left),                        //  Actualizo altura
+                                  itree_altura(temp->right));
     }
     return temp;
   }
@@ -108,10 +110,25 @@ ITree itree_eliminar(double ini, double fin, ITree tree) {
      tree->left = itree_eliminar(ini, fin, tree->left);
   else
      tree->right = itree_eliminar(ini, fin,tree->right);
-  actualizar_max(tree);                                                          //  Actualizo max
-  tree->altura = 1 + maximo2(itree_altura(tree->left),                           //  Actualizo altura
-                             itree_altura(tree->right));
+  actualizar_max(tree);                                                         //  Actualizo max
+  tree->altura = 1 + maximo_i(itree_altura(tree->left),                         //  Actualizo altura
+                              itree_altura(tree->right));
   return tree; 
+}
+
+ITree itree_intersectar(double ini, double fin, ITree tree) {
+  printf("Llegué a [%lf, %lf]\n", tree->extremo_izq, tree->extremo_der);
+  if (tree->max < ini) // El intervalo está a la derecha del máximo
+    return NULL;
+  if (fin < tree->extremo_izq) // El intervalo está a la izquierda de la raíz
+    return itree_intersectar(ini, fin, tree->left);
+  if (tree->extremo_der < ini) { // El intervalo está a la derecha de la raíz
+    if (tree->left->max < ini)  // Si el máximo del hijo izq no llega al interv.
+      return itree_intersectar(ini, fin, tree->right); // Busco derecha
+    else                                               // sino
+      return itree_intersectar(ini, fin, tree->left);  // busco izquierda
+  }
+  return tree; // El intervalo interseca a la raíz actual
 }
 
 ITree minimo_nodo_a_raiz(ITree tree){
@@ -125,8 +142,8 @@ ITree minimo_nodo_a_raiz(ITree tree){
   min = minimo_nodo_a_raiz(min);
   min->right = tree;
   actualizar_max(tree);
-  tree->altura = 1 + maximo2(itree_altura(tree->left),                           //  Actualizo altura
-                             itree_altura(tree->right));
+  tree->altura = 1 + maximo_i(itree_altura(tree->left),                         //  Actualizo altura
+                              itree_altura(tree->right));
   return min;
 }
 
@@ -138,12 +155,12 @@ int itree_altura(ITree arbol) {
 }
 
 void actualizar_altura(ITree nodo) {
-  nodo->altura = 1 + maximo2(itree_altura(nodo->left), 
-                             itree_altura(nodo->right));
+  nodo->altura = 1 + maximo_i(itree_altura(nodo->left), 
+                              itree_altura(nodo->right));
 }
 
 int itree_balance_factor(ITree nodo) {
-  return itree_altura(nodo->right) - itree_altura(nodo->left);	
+  return itree_altura(nodo->right) - itree_altura(nodo->left);
 }
 
 ITree rotar_a_izquierda(ITree tree) {
@@ -161,7 +178,7 @@ ITree rotar_a_izquierda(ITree tree) {
   actualizar_altura(nuevaRaiz);
   
   return nuevaRaiz;
-	
+
 }
 
 ITree rotar_a_derecha(ITree tree) {
@@ -222,58 +239,55 @@ void itree_recorrer_bfs(ITree arbol, FuncionVisitante visit) {
   Cola cola = cola_crear();
   cola_encolar(cola, arbol); // Encolo la raíz
   while(!cola_es_vacia(cola)) {
-    ITree primero = (ITree)cola_primero(cola);
-    if (!itree_empty(primero->left))
+    ITree primero = (ITree)cola_primero(cola); // Me posiciono en el 1ero
+    if (!itree_empty(primero->left)) // Si tiene hijo izq, lo encolo
       cola_encolar(cola, primero->left);
-    if (!itree_empty(primero->right))
+    if (!itree_empty(primero->right)) // Si tiene hijo der, lo encolo
     cola_encolar(cola, primero->right);
-    visit(primero);
-    cola_desencolar(cola);
+    visit(primero); // Visito el 1ero
+    cola_desencolar(cola); // Lo saco de la cola
   }
   cola_destruir(cola);
 }
 
-int intervalos_comparar(double ini1, double fin1, double ini2,double fin2) {
+int intervalos_comparar(double ini1, double fin1, double ini2, double fin2) {
   if (ini1 < ini2)
     return -1;
   if (ini1 > ini2)
     return 1;
-  if (ini1 == ini2){
+  if (ini1 == ini2) { // En caso de empate, me fijo en los extremos derechos
     if (fin1 < fin2)
       return -1;
     if (fin1 > fin2)
       return 1;
-    else 
-      return 0;
   }
-  return 0; // Facu: lo puse yo para que no me diera error el -Werror
-            // error: control reaches end of a non-void function
+  return 0; // Si llega a este return los intervalos son iguales
 }
 
 void actualizar_max(ITree nodo) {
   if (itree_empty(nodo))
     return;
   if (nodo->left) {
-	if (nodo->right) { 
-      double aux_max = maximo(nodo->left->max, nodo->right->max);
-      nodo->max = maximo(nodo->extremo_der, aux_max);
-	}else
-	  nodo->max = maximo(nodo->extremo_der, nodo->left->max);
-  }else if (nodo->right)
-	      nodo->max = maximo(nodo->extremo_der, nodo->right->max);
-	    else nodo->max = nodo->extremo_der;
+    if (nodo->right) {
+      double aux_max = maximo_d(nodo->left->max, nodo->right->max);
+      nodo->max = maximo_d(nodo->extremo_der, aux_max);
+    } else
+      nodo->max = maximo_d(nodo->extremo_der, nodo->left->max);
+  } else if (nodo->right)
+      nodo->max = maximo_d(nodo->extremo_der, nodo->right->max);
+    else nodo->max = nodo->extremo_der;
 }
 
-float maximo(double a, double b) {
+double maximo_d(double a, double b) {
   if(a < b)
     return b;
   else
     return a;
 }
 
-int maximo2(int a, int b) {
-	if (a < b)
-	  return b;
-	else
-	  return a;
+int maximo_i(int a, int b) {
+  if (a < b)
+    return b;
+  else
+    return a;
 }

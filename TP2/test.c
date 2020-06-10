@@ -40,14 +40,27 @@ int main() {
   test = itree_eliminar(-0.3, 1, test);
   test = itree_eliminar(1.5, 2.5, test);
   */
+  /*
   printf("TEST PREORDER\n");
   itree_recorrer_dfs(test, ITREE_RECORRIDO_PRE, mostrar_intervalo);
   printf("TEST bfs\n");
   itree_recorrer_bfs(test, mostrar_intervalo);
+  */
   //printf("TEST INORDER\n");
   //itree_recorrer_dfs(test, ITREE_RECORRIDO_IN, mostrar_intervalo);
   //printf("TEST POSORDER\n");
   //itree_recorrer_dfs(test, ITREE_RECORRIDO_POST, mostrar_intervalo);
+  
+  ITree a = itree_intersectar(2.1, 2.3, test);
+  if (!itree_empty(a))
+    mostrar_intervalo(a);
+  else
+    printf("No se encontró intersec/c [2.1, 2.3]\n");
+  ITree b = itree_intersectar(7, 7.1, test);
+  if (!itree_empty(b))
+    mostrar_intervalo(b);
+  else
+    printf("No se encontró intersec/c [7, 7.1]\n");
   
   itree_destruir(test);
   return 0;
