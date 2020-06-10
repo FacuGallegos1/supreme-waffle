@@ -41,24 +41,10 @@ void itree_destruir(ITree nodo);
 int itree_empty(ITree nodo);
 
 /**
- * Dados un árbol y los extremos de un presunto intervalo,
- * lo inserta en el árbol solo si dicho intervalo es válido.
- */
-ITree itree_v_insertar(double ini, double fin, ITree tree);
-
-/**
  * Inserta un intervalo (válido) en el árbol y chequea que 
  * siga siendo un árbol AVL. 
  */
 ITree itree_insertar(double ini, double fin, ITree tree);
-
-/**
- * Dados un árbol y los extremos de un presunto intervalo,
- * lo elimina del árbol solo si dicho intervalo es válido. 
- * En caso de no existir el intervalo, devuleve el árbol 
- * sin cambios.
- */
-ITree itree_v_eliminar(double ini, double fin, ITree tree);
 
 /**
  * Elimina un intervalo (válido) del árbol y chequea que 
@@ -66,14 +52,6 @@ ITree itree_v_eliminar(double ini, double fin, ITree tree);
  * intervalo, devuleve el árbol sin cambios.
  */
 ITree itree_eliminar(double ini, double fin, ITree tree);
-
-/**
- * Dados un árbol y los extremos de un presunto intervalo,
- * una vez validado dicho intervalo, busca su intersección en
- * el árbol. Si esta existe, devuelve un apuntador al nodo
- * correspondiente.
- */
-ITree itree_v_intersectar(double ini, double fin, ITree tree);
 
 /**
  * Determina si un intervalo (válido) se intersecta con alguno de los 
@@ -146,5 +124,15 @@ double maximo_d(double a, double b);
  * Devuelve el máximo entre dos números int.
  */
 int maximo_i(int a, int b);
+
+/**
+ * Imprime por pantalla un nodo de ITree.
+ */
+void mostrar_intervalo(ITNodo* nodo);
+
+/**
+ * Determina si un intervalo es válido.
+ */
+int validar_intervalo(double ini, double fin);
 
 #endif /* __ITREE_H__ */

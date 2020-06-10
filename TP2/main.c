@@ -1,11 +1,10 @@
 // Intérprete para itree
-#include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
 #include "itree.h"
 
-// Type definitions
+// Definiciones de tipos
 typedef union {
   double d;
   /* Se pueden agregar otros en caso de necesitarlo:
@@ -22,8 +21,8 @@ typedef struct {
   const char* doc;
 } cmd_t;
 
-#define MK_CMD(x) void cmd_ ## x (arg_t*)
-// Functions definitions
+// Definiciones de funciones
+#define MK_CMD(x) void cmd_ ## x (arg_t*) 
 MK_CMD(i);
 MK_CMD(e);
 MK_CMD(intersec);
@@ -34,8 +33,8 @@ MK_CMD(help);
 
 arg_t *args_parse(const char *s);
 
-// Global data
-// The dispatch table
+// Datos globales
+// La tabla de mapeo
 #define CMD(func, params, help) {#func, cmd_ ## func, params, help}
 #define CMDS 7
 cmd_t dsp_table[CMDS] = {
@@ -55,6 +54,9 @@ const char *delim = " \n[,];";
 ITree arbol;
 
 // Implementación de funciones
+/**
+ * Parseo de comandos en funciones
+ */
 void parse(char *cmd) {
   const char* tok = strtok(cmd, delim);
   if(!tok)
@@ -63,19 +65,22 @@ void parse(char *cmd) {
   int i = CMDS;
   while(i--) {
     cmd_t cur = dsp_table[i];
-    if(!strcmp(tok, cur.name)) {
-      arg_t *args = args_parse(cur.args);
+    if(!strcmp(tok, cur.name)) { // Encuentro la función
+      arg_t *args = args_parse(cur.args); // Parseo los argumentos
       if(args == NULL && strlen(cur.args))
-        return; // Error in argument parsing
+        return; // Error en el parseo de argumentos
       cur.func(args);
       free(args);
       return;
     }
   }
-  puts("Command Not Found");
+  puts("Comando incorrecto");
 }
 
-#define ESCAPE {free(args); puts("Bad Argument(s)"); return NULL;}
+/**
+ * Parseo de argumentos en tipos
+ */
+#define ESCAPE {free(args); puts("Argumento(s) incorrecto(s)"); return NULL;}
 arg_t *args_parse(const char *s) {
   int argc = strlen(s);
   arg_t *args = malloc(sizeof(arg_t) * argc);
@@ -102,56 +107,75 @@ int main() {
   
   arbol = itree_crear();
   
-  // Read Parse Exec Loop
+  // Lee - Parsea - Ejecuta - Loopea
   char cmd[200];
   while(1) {
-    printf("El valor de arbol: %p\n", arbol);
     printf("%s ",prompt);
     fflush(stdout);
+    
     parse(fgets(cmd,200,stdin));
   }
 
   return 2;
 }
 
-void mostrar_intervalo(ITNodo* nodo) {
-  printf("[%f, %f], max = %f, altura =%d\n", nodo->extremo_izq, 
-                                             nodo->extremo_der, nodo->max, 
-                                             nodo->altura);
-}
-
+/**
+ * Funciones que mapean comandos en funciones de ITree.
+ * También controlan los intervalos ingresados.
+ */
 void cmd_i(arg_t *args) {
-  arbol = itree_insertar(args[0].d, args[1].d, arbol);
-}
-void cmd_e(arg_t *args) {
-  arbol = itree_eliminar(args[0].d, args[1].d, arbol);
-}
-void cmd_intersec(arg_t *args) {
-  ITree temp = itree_intersectar(args[0].d, args[1].d, arbol);
-  if (itree_empty(temp))
-    printf("No\n");
-  else {
-    printf("Si ");
-    mostrar_intervalo(temp);
+  if (validar_intervalo(args[0].d, args[1].d)) { // Si el intervalo es válido
+    arbol = itree_insertar(args[0].d, args[1].d, arbol);
+  } else {
+    printf("El intervalo ingresado no es válido\n");
+    return;
   }
 }
+
+void cmd_e(arg_t *args) {
+  if (validar_intervalo(args[0].d, args[1].d)) { // Si el intervalo es válido
+    arbol = itree_eliminar(args[0].d, args[1].d, arbol);
+  } else {
+    printf("El intervalo ingresado no es válido\n");
+    return;
+  }
+}
+
+void cmd_intersec(arg_t *args) {
+  if (validar_intervalo(args[0].d, args[1].d)) { // Si el intervalo es válido
+    ITree temp = itree_intersectar(args[0].d, args[1].d, arbol);
+    if (itree_empty(temp)) // Si la intersección es vacía
+      printf("No\n");
+    else {
+      printf("Si ");
+      mostrar_intervalo(temp);
+    }
+  } else {
+    printf("El intervalo ingresado no es válido\n");
+    return;
+  }
+}
+
 void cmd_dfs(arg_t *args) {
   itree_recorrer_dfs(arbol, ITREE_RECORRIDO_PRE, mostrar_intervalo);
 }
+
 void cmd_bfs(arg_t *args) {
   itree_recorrer_bfs(arbol, mostrar_intervalo);
 }
+
 void cmd_salir(arg_t *args) {
   itree_destruir(arbol);
   arbol = NULL;
   exit(0);
 }
+
 void cmd_help(arg_t *args) {
-  puts("Available Commands:");
+  puts("Comandos disponibles:");
   int i = CMDS;
   while(i--) {
     cmd_t cmd = dsp_table[i];
-    char tmp[100]; // Formatting buffer
+    char tmp[100]; // Formateando el buffer para mostrarlo
     snprintf(tmp, 100, "%s(%s)", cmd.name, cmd.args);
     printf("%10s\t- %s\n", tmp, cmd.doc);
   }
