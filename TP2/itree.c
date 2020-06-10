@@ -30,12 +30,15 @@ int itree_empty(ITree nodo) {
   return nodo == NULL;
 }
 
-ITree itree_insertar(double ini, double fin, ITree tree) {
-  /*
-  if (ini > fin){                                       
+ITree itree_v_insertar(double ini, double fin, ITree tree) {
+  if (ini > fin) {                                       
 	printf("El intervalo [%f, %f] no es válido.\n", ini, fin);
 	return tree;
-  }*/
+  }else
+    return itree_insertar(ini, fin, tree);
+}
+
+ITree itree_insertar(double ini, double fin, ITree tree) {
   if (itree_empty(tree)) {                                                      // si es vacio, creo el nodo,
     tree = nodo_nuevo(ini, fin);                                                // caso base
     return tree;                                                                
@@ -79,6 +82,14 @@ ITree itree_insertar(double ini, double fin, ITree tree) {
   }
   
   return tree;
+}
+
+ITree itree_v_eliminar(double ini, double fin, ITree tree) {
+  if (ini > fin) {                                       
+	printf("El intervalo [%f, %f] no es válido.\n", ini, fin);
+	return tree;
+  }else
+    return itree_eliminar(ini, fin, tree);
 }
 
 ITree itree_eliminar(double ini, double fin, ITree tree) {
@@ -132,6 +143,14 @@ ITree itree_eliminar(double ini, double fin, ITree tree) {
   return tree; 
 }
 
+ITree itree_v_intersectar(double ini, double fin, ITree tree) {
+  if (ini > fin) {                                       
+	printf("El intervalo [%f, %f] no es válido.\n", ini, fin);
+	return tree;
+  }else
+    return itree_intersectar(ini, fin, tree);
+}
+
 ITree itree_intersectar(double ini, double fin, ITree tree) {
   printf("Llegué a [%lf, %lf]\n", tree->extremo_izq, tree->extremo_der);
   if (tree->max < ini) // El intervalo está a la derecha del máximo
@@ -172,8 +191,8 @@ ITree minimo_nodo_a_raiz(ITree tree){
     tree->right = rotar_a_derecha(tree->right);
     min->right = rotar_a_izquierda(tree);
   }
-  else 
-   return min;
+  
+  return min;
 }
 
 int itree_altura(ITree arbol) {
