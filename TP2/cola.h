@@ -6,10 +6,12 @@ typedef struct _GNodo{
   struct _GNodo* ant;
 } GNodo;
 
-typedef struct _Cola {
+typedef struct {
   GNodo* primero;
   GNodo* ultimo;
-} *Cola;
+}_Cola;
+
+typedef _Cola* Cola;
 
 /**
  * Crea la cola.

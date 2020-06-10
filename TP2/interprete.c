@@ -2,17 +2,17 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <ctype.h>
+#include "itree.h"
 
 // Type definitions
 typedef union {
   double d;
-/* Se pueden agregar otros en caso de necesitarlo:
- * char  *s;
- * char   c;
- * float  f;
- * */
+  /* Se pueden agregar otros en caso de necesitarlo:
+   * char  *s;
+   * char   c;
+   * float  f;
+   * */
 } arg_t;
 
 typedef struct {
@@ -34,7 +34,8 @@ MK_CMD(help);
 
 arg_t *args_parse(const char *s);
 
-//The dispatch table
+// Global data
+// The dispatch table
 #define CMD(func, params, help) {#func, cmd_ ## func, params, help}
 #define CMDS 7
 cmd_t dsp_table[CMDS] = {
@@ -47,7 +48,13 @@ cmd_t dsp_table[CMDS] = {
   CMD(help,"","Visualiza esta ayuda.")
 };
 
+// Delimitador
 const char *delim = " \n[,];";
+
+// Arbol
+ITree arbol;
+
+// Implementación de funciones
 void parse(char *cmd) {
   const char* tok = strtok(cmd, delim);
   if(!tok)
@@ -92,41 +99,60 @@ arg_t *args_parse(const char *s) {
 int main() {
   char prompt[200];
   strncpy(prompt,">",200);
-
+  
+  arbol = itree_crear();
+  
   // Read Parse Exec Loop
   char cmd[200];
   while(1) {
+    printf("El valor de arbol: %p\n", arbol);
     printf("%s ",prompt);
     fflush(stdout);
-
     parse(fgets(cmd,200,stdin));
   }
 
   return 2;
 }
 
+void mostrar_intervalo(ITNodo* nodo) {
+  printf("[%f, %f], max = %f, altura =%d\n", nodo->extremo_izq, 
+                                             nodo->extremo_der, nodo->max, 
+                                             nodo->altura);
+}
+
 void cmd_i(arg_t *args) {
-  printf("Acá iría el insertar\n");
-  printf("args[0].d: %lf, args[1].d: %lf\n", args[0].d, args[1].d);
+  arbol = itree_insertar(args[0].d, args[1].d, arbol);
 }
 void cmd_e(arg_t *args) {
-  printf("Acá iría el eliminar\n");
-  printf("args[0].d: %lf, args[1].d: %lf\n", args[0].d, args[1].d);
+  arbol = itree_eliminar(args[0].d, args[1].d, arbol);
 }
 void cmd_intersec(arg_t *args) {
-  printf("Acá iría el intersectar\n");
-  printf("args[0].d: %lf, args[1].d: %lf\n", args[0].d, args[1].d);
+  ITree temp = itree_intersectar(args[0].d, args[1].d, arbol);
+  if (itree_empty(temp))
+    printf("No\n");
+  else {
+    printf("Si ");
+    mostrar_intervalo(temp);
+  }
 }
-void cmd_dfs(arg_t *args) {printf("Acá iría el dfs\n");}
-void cmd_bfs(arg_t *args) {printf("Acá iría el bfs\n");}
-void cmd_salir(arg_t *args) {exit(0);}
+void cmd_dfs(arg_t *args) {
+  itree_recorrer_dfs(arbol, ITREE_RECORRIDO_PRE, mostrar_intervalo);
+}
+void cmd_bfs(arg_t *args) {
+  itree_recorrer_bfs(arbol, mostrar_intervalo);
+}
+void cmd_salir(arg_t *args) {
+  itree_destruir(arbol);
+  arbol = NULL;
+  exit(0);
+}
 void cmd_help(arg_t *args) {
   puts("Available Commands:");
   int i = CMDS;
   while(i--) {
     cmd_t cmd = dsp_table[i];
     char tmp[100]; // Formatting buffer
-    snprintf(tmp,100,"%s(%s)",cmd.name,cmd.args);
-    printf("%10s\t- %s\n",tmp,cmd.doc);
+    snprintf(tmp, 100, "%s(%s)", cmd.name, cmd.args);
+    printf("%10s\t- %s\n", tmp, cmd.doc);
   }
 }

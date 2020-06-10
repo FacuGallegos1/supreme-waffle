@@ -3,7 +3,7 @@
 #include "cola.h"
 
 Cola cola_crear() {
-  Cola cola = malloc(sizeof(Cola));
+  Cola cola = malloc(sizeof(_Cola));
   cola->primero = NULL;
   cola->ultimo = NULL;
   return cola;

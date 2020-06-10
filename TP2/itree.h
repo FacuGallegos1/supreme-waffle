@@ -7,14 +7,6 @@ typedef enum {
   ITREE_RECORRIDO_POST
 } ITreeOrdenDeRecorrido;
 
-
-/* no la uso a la estructura */
-typedef struct _Intervalo {
-  double extremo_izq;
-  double extremo_der;
-} Intervalo;
-
-
 typedef struct _ITNodo {
   double extremo_izq;
   double extremo_der;
