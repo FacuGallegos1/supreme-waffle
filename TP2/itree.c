@@ -122,23 +122,6 @@ ITree itree_eliminar(double ini, double fin, ITree tree) {
   }
 }
 
-/*
-ITree itree_intersectar(double ini, double fin, ITree tree) {
-  printf("Llegué a [%lf, %lf]\n", tree->extremo_izq, tree->extremo_der);
-  if (tree->max < ini) // El intervalo está a la derecha del máximo
-    return NULL;
-  if (fin < tree->extremo_izq) // El intervalo está a la izquierda de la raíz
-    return itree_intersectar(ini, fin, tree->left);
-  if (tree->extremo_der < ini) { // El intervalo está a la derecha de la raíz
-    if (tree->left->max < ini)  // Si el máximo del hijo izq no llega al interv.
-      return itree_intersectar(ini, fin, tree->right); // Busco derecha
-    else                                               // sino
-      return itree_intersectar(ini, fin, tree->left);  // busco izquierda
-  }
-  return tree; // El intervalo interseca a la raíz actual
-}
-*/
-
 ITree itree_intersectar(double ini, double fin, ITree tree) {
   if(itree_empty(tree)) // El árbol es vacío
     return NULL;
