@@ -53,28 +53,24 @@ ITree itree_insertar(double ini, double fin, ITree tree) {
   
   if (-1 <= bf && bf <= 1)
     return tree;
+  else{
+    if (bf < -1 && intervalos_comparar(ini, fin, tree->left->extremo_izq,       // caso izq izq
+                                          tree->left->extremo_der) == -1)   
+      return rotar_a_derecha(tree);
   
-  if (bf < -1 && intervalos_comparar(ini, fin, tree->left->extremo_izq,         // caso izq izq
-                                              tree->left->extremo_der) == -1)   
-    return rotar_a_derecha(tree);
-  
-  if (bf < -1 && intervalos_comparar(ini, fin, tree->left->extremo_izq,         // caso izq der
+    else if (bf < -1 && intervalos_comparar(ini, fin, tree->left->extremo_izq,  // caso izq der
                                               tree->left->extremo_der) == 1) {
-    tree->left = rotar_a_izquierda(tree->left);
-    return rotar_a_derecha(tree);
+      tree->left = rotar_a_izquierda(tree->left);
+      return rotar_a_derecha(tree);
+    }
+    else if (bf > 1 && intervalos_comparar(ini, fin, tree->right->extremo_izq,  // caso der der
+                                               tree->right->extremo_der) == 1) 
+      return rotar_a_izquierda(tree);
+    else{                                                                       // caso der izq 
+      tree->right = rotar_a_derecha(tree->right);
+      return rotar_a_izquierda(tree);
+    }
   }
-  
-  if (bf > 1 && intervalos_comparar(ini, fin, tree->right->extremo_izq,         // caso der der
-                                              tree->right->extremo_der) == 1) 
-    return rotar_a_izquierda(tree);
-  
-  if (bf > 1 && intervalos_comparar(ini, fin, tree->right->extremo_izq,         // caso der izq
-                                              tree->right->extremo_der) == -1) {
-    tree->right = rotar_a_derecha(tree->right);
-    return rotar_a_izquierda(tree);
-  }
-  
-  return tree;
 }
 
 ITree itree_eliminar(double ini, double fin, ITree tree) {
@@ -108,24 +104,22 @@ ITree itree_eliminar(double ini, double fin, ITree tree) {
   actualizar_altura(tree);                                                      // Actualizo altura
   
   int bf = itree_balance_factor(tree);                                          // Guardo el factor balance
-  
-  if (bf < -1 && itree_balance_factor(tree->left) <= 0)                         // caso izq izq
-    return rotar_a_derecha(tree);
-  
-  if (bf < -1 && itree_balance_factor(tree->left) > 0) {                        // caso izq der
-    tree->left = rotar_a_izquierda(tree->left);
-    return rotar_a_derecha(tree);
+  if (-1 <= bf && bf <= 1)
+    return tree;
+  else{
+    if (bf < -1 && itree_balance_factor(tree->left) <= 0)                       // caso izq izq
+      return rotar_a_derecha(tree);
+    else if (bf < -1 && itree_balance_factor(tree->left) > 0) {                 // caso izq der
+      tree->left = rotar_a_izquierda(tree->left);
+      return rotar_a_derecha(tree);
+    }
+    else if (bf > 1 && itree_balance_factor(tree->right) >= 0)                  // caso der der
+      return rotar_a_izquierda(tree);
+    else{
+      tree->right = rotar_a_derecha(tree->right);
+      return rotar_a_izquierda(tree);
+    }
   }
-  
-  if (bf > 1 && itree_balance_factor(tree->right) >= 0)                         // caso der der
-    return rotar_a_izquierda(tree);
-  
-  if (bf > 1 && itree_balance_factor(tree->right) < 0) {                        // caso der izq
-    tree->right = rotar_a_derecha(tree->right);
-    return rotar_a_izquierda(tree);
-  }
-  
-  return tree; 
 }
 
 ITree itree_intersectar(double ini, double fin, ITree tree) {
